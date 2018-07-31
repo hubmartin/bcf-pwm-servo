@@ -1,5 +1,7 @@
 #include <application.h>
 
+#include <bc_timer.h>
+
 bc_led_t led;
 bc_button_t button;
 
@@ -20,10 +22,11 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
         bc_led_pulse(&led, 100);
 
         // Divide by 5 = 5 us
-        bc_pwm_set(BC_GPIO_P1, servo_table[cycle_index] / 5);
+        bc_pwm_set(BC_PWM_P1, servo_table[cycle_index] / 5);
 
         // PWM Duty is 0-255, do not divide values
-        bc_pwm_set(BC_GPIO_P6, pwm_table[cycle_index]);
+        bc_pwm_set(BC_PWM_P6, pwm_table[cycle_index]);
+        bc_pwm_set(BC_PWM_P12, pwm_table[cycle_index]);
 
         // Increment counter for next value
         cycle_index++;
@@ -52,32 +55,61 @@ void application_init(void)
     bc_pwm_enable(BC_GPIO_P0);
 */
 
-    bc_pwm_init(BC_GPIO_P1);
+    // TIM2
+    bc_pwm_init(BC_PWM_P1);
     // Reconfigure TIM2 for servo pulses
     // This affects channels P0-P3 period
-    bc_pwm_tim2_init(5, 255 * 16);
-    bc_pwm_set(BC_GPIO_P1, 110);
-    bc_pwm_enable(BC_GPIO_P1);
+    bc_pwm_tim2_configure(5, 255 * 16);
+    bc_pwm_set(BC_PWM_P1, 110);
+    bc_pwm_enable(BC_PWM_P1);
 
-    bc_pwm_init(BC_GPIO_P2);
-    bc_pwm_set(BC_GPIO_P2, 80);
-    bc_pwm_enable(BC_GPIO_P2);
+    bc_pwm_init(BC_PWM_P2);
+    bc_pwm_set(BC_PWM_P2, 80);
+    bc_pwm_enable(BC_PWM_P2);
 
-    bc_pwm_init(BC_GPIO_P3);
-    bc_pwm_set(BC_GPIO_P3, 120);
-    bc_pwm_enable(BC_GPIO_P3);
+    bc_pwm_init(BC_PWM_P3);
+    bc_pwm_set(BC_PWM_P3, 120);
+    bc_pwm_enable(BC_PWM_P3);
 
     // TIM3
-    bc_pwm_init(BC_GPIO_P6);
-    bc_pwm_set(BC_GPIO_P6, 180);
-    bc_pwm_enable(BC_GPIO_P6);
+    bc_pwm_init(BC_PWM_P6);
+    bc_pwm_set(BC_PWM_P6, 180);
+    bc_pwm_enable(BC_PWM_P6);
 
-    bc_pwm_init(BC_GPIO_P7);
-    bc_pwm_set(BC_GPIO_P7, 210);
-    bc_pwm_enable(BC_GPIO_P7);
+    bc_pwm_init(BC_PWM_P7);
+    bc_pwm_set(BC_PWM_P7, 210);
+    bc_pwm_enable(BC_PWM_P7);
 
-    bc_pwm_init(BC_GPIO_P8);
-    bc_pwm_set(BC_GPIO_P8, 255);
-    bc_pwm_enable(BC_GPIO_P8);
+    bc_pwm_init(BC_PWM_P8);
+    bc_pwm_set(BC_PWM_P8, 255);
+    bc_pwm_enable(BC_PWM_P8);
 
+    // TIM21
+    bc_pwm_init(BC_PWM_P12);
+    bc_pwm_set(BC_PWM_P12, 10);
+    bc_pwm_enable(BC_PWM_P12);
+
+    bc_pwm_init(BC_PWM_P14);
+    bc_pwm_set(BC_PWM_P14, 128);
+    bc_pwm_enable(BC_PWM_P14);
+
+    bc_timer_init();
+
+    bc_gpio_init(BC_GPIO_P9);
+    bc_gpio_set_mode(BC_GPIO_P9, BC_GPIO_MODE_OUTPUT);
+}
+
+
+void application_task()
+{
+    // bc_delay test loop
+    bc_gpio_set_output(BC_GPIO_P9, true);
+
+    bc_timer_start();
+    bc_timer_delay(5000);
+    bc_timer_stop();
+
+    bc_gpio_set_output(BC_GPIO_P9, false);
+
+    bc_scheduler_plan_current_relative(50);
 }
