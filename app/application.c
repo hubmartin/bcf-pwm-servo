@@ -53,15 +53,11 @@ void application_init(void)
 */
 
     bc_pwm_init(BC_GPIO_P1);
-
     // Reconfigure TIM2 for servo pulses
     // This affects channels P0-P3 period
     bc_pwm_tim2_init(5, 255 * 16);
-
     bc_pwm_set(BC_GPIO_P1, 110);
     bc_pwm_enable(BC_GPIO_P1);
-
-
 
     bc_pwm_init(BC_GPIO_P2);
     bc_pwm_set(BC_GPIO_P2, 80);
